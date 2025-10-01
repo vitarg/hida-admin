@@ -143,19 +143,19 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 gap-3">
-              <button className="p-4 border rounded-lg hover:bg-accent text-left">
+              <button type="button" className="p-4 border rounded-lg hover:bg-accent text-left">
                 <div className="font-medium">Создать пользователя</div>
                 <div className="text-sm text-muted-foreground">Добавить нового пользователя</div>
               </button>
-              <button className="p-4 border rounded-lg hover:bg-accent text-left">
+              <button type="button" className="p-4 border rounded-lg hover:bg-accent text-left">
                 <div className="font-medium">Модерация</div>
                 <div className="text-sm text-muted-foreground">Проверить контент</div>
               </button>
-              <button className="p-4 border rounded-lg hover:bg-accent text-left">
+              <button type="button" className="p-4 border rounded-lg hover:bg-accent text-left">
                 <div className="font-medium">Отчеты</div>
                 <div className="text-sm text-muted-foreground">Создать отчет</div>
               </button>
-              <button className="p-4 border rounded-lg hover:bg-accent text-left">
+              <button type="button" className="p-4 border rounded-lg hover:bg-accent text-left">
                 <div className="font-medium">Настройки</div>
                 <div className="text-sm text-muted-foreground">Системные настройки</div>
               </button>
