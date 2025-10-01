@@ -1,73 +1,60 @@
-# React + TypeScript + Vite
+# Hida Admin
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Hida Admin — административная панель для приложения Hida, которое объединяет доставку бутилированной воды от разных поставщиков. Интерфейс помогает операторам контролировать заказы, следить за активностью продавцов, управлять контентом и поддерживать настройки платформы.
 
-Currently, two official plugins are available:
+## Возможности
+- Постоянный сайдбар и заголовок с адаптивной версткой для удобства навигации
+- Дашборд с примером ключевых метрик, ленты событий и быстрых действий
+- Модуль управления пользователями с поиском, фильтрами и типовыми операциями
+- Рабочее место для контента: карточки сводных показателей, фильтры и список публикаций
+- Раздел настроек с общими параметрами, безопасностью, интеграциями и резервным копированием
+- Набор базовых UI-компонентов (button, card, input, label), адаптированных под Tailwind CSS
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Технологический стек
+- React 19 и TypeScript
+- Vite 7 в качестве сборщика и dev-сервера
+- React Router для клиентской навигации
+- Tailwind CSS с помощниками tailwind-merge и class-variance-authority
+- Компоненты Radix UI для доступных форм и элементов интерфейса
 
-## React Compiler
+## Быстрый старт
+1. Установите Node.js 18+ и менеджер пакетов pnpm.
+2. Установите зависимости:
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+   ```bash
+   pnpm install
+   ```
 
-## Expanding the ESLint configuration
+3. Запустите локальный сервер разработки:
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+   ```bash
+   pnpm dev
+   ```
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+   По умолчанию приложение доступно по адресу `http://localhost:5173/`.
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## Доступные скрипты
+- `pnpm dev` — запуск Vite в режиме разработки с HMR
+- `pnpm build` — проверка типов и сборка production-бандла в `dist`
+- `pnpm preview` — предпросмотр собранного приложения
+- `pnpm lint` — запуск ESLint для анализа исходников
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Структура проекта
+```
+├── src
+│   ├── components
+│   │   ├── layout      # оболочка с сайдбаром и шапкой
+│   │   └── ui          # переиспользуемые UI-примитивы
+│   ├── pages           # Dashboard, Users, Content, Settings
+│   ├── router          # декларация маршрутов
+│   ├── lib             # утилиты, например объединитель классов
+│   └── assets          # статические ресурсы
+├── public              # файлы, отдаваемые как есть
+└── vite.config.ts      # конфигурация Vite
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Стили и кастомизация
+Интерфейс построен на utility-классах Tailwind CSS. Карточки, кнопки и другие элементы вынесены в отдельные компоненты, поэтому вы можете быстро адаптировать тему, настроив `tailwind.config.js` или расширив существующие примитивы.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## Дальнейшие шаги
+Подключите дашборд и разделы управления к реальным API Hida, добавьте статистику по поставщикам и заказам, замените моковые списки на данные из базы и развивайте систему ролей для операторов и партнеров.
