@@ -2,6 +2,7 @@ import { Suspense, lazy } from 'react'
 import { RouterProvider, createBrowserRouter } from 'react-router-dom'
 
 import { Layout } from '@/components/layout/Layout'
+import { LoadingState } from '@/components/ui/loading'
 
 import { ProtectedRoute } from './ProtectedRoute'
 import { PublicRoute } from './PublicRoute'
@@ -17,12 +18,14 @@ const router = createBrowserRouter([
   {
     path: '/',
     element: <Layout />,
+    handle: { breadcrumb: 'Главная' },
     children: [
       {
         element: <ProtectedRoute />,
         children: [
           {
             index: true,
+            handle: { breadcrumb: 'Dashboard' },
             element: (
               <Suspense fallback={<RouteFallback />}>
                 <DashboardPage />
@@ -31,6 +34,7 @@ const router = createBrowserRouter([
           },
           {
             path: 'users',
+            handle: { breadcrumb: 'Пользователи' },
             element: (
               <Suspense fallback={<RouteFallback />}>
                 <UsersPage />
@@ -39,6 +43,7 @@ const router = createBrowserRouter([
           },
           {
             path: 'content',
+            handle: { breadcrumb: 'Контент' },
             element: (
               <Suspense fallback={<RouteFallback />}>
                 <ContentPage />
@@ -47,6 +52,7 @@ const router = createBrowserRouter([
           },
           {
             path: 'settings',
+            handle: { breadcrumb: 'Настройки' },
             element: (
               <Suspense fallback={<RouteFallback />}>
                 <SettingsPage />
@@ -57,6 +63,7 @@ const router = createBrowserRouter([
       },
       {
         path: '*',
+        handle: { breadcrumb: 'Страница не найдена' },
         element: (
           <Suspense fallback={<RouteFallback />}>
             <NotFoundPage />
@@ -70,6 +77,7 @@ const router = createBrowserRouter([
     children: [
       {
         path: '/login',
+        handle: { breadcrumb: 'Вход' },
         element: (
           <Suspense fallback={<RouteFallback />}>
             <LoginPage />
@@ -90,18 +98,12 @@ export function AppRouter() {
 
 function AppFallback() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50">
-      <div className="rounded-md border border-gray-200 bg-white px-6 py-4 text-sm text-muted-foreground shadow-sm">
-        Загружаем панель администратора...
-      </div>
+    <div className="flex min-h-screen items-center justify-center bg-gray-50 p-6">
+      <LoadingState className="rounded-md border border-border bg-background px-8 py-6 shadow-sm" message="Загружаем панель администратора..." />
     </div>
   )
 }
 
 function RouteFallback() {
-  return (
-    <div className="flex h-full flex-1 items-center justify-center py-16 text-muted-foreground">
-      Загрузка...
-    </div>
-  )
+  return <LoadingState className="h-full py-16" />
 }

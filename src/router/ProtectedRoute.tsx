@@ -1,5 +1,6 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
 
+import { LoadingState } from '@/components/ui/loading'
 import { useAuth } from '@/stores/auth-context'
 
 export function ProtectedRoute() {
@@ -7,11 +8,7 @@ export function ProtectedRoute() {
   const { isAuthenticated, isInitializing } = useAuth()
 
   if (isInitializing) {
-    return (
-      <div className="flex h-full items-center justify-center py-16 text-muted-foreground">
-        Проверяем права доступа...
-      </div>
-    )
+    return <LoadingState className="h-full py-16" message="Проверяем права доступа..." />
   }
 
   if (!isAuthenticated) {
