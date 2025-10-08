@@ -92,6 +92,68 @@
 
 ---
 
+### 6. companies_view
+> Представление, объединяющее профиль компании и агрегированную статистику (используется на странице компании).
+
+| Поле | Тип | Описание |
+|------|-----|-----------|
+| `id` | `uuid` | Идентификатор компании |
+| `user_id` | `uuid` | Владелец (auth.users.id) |
+| `name` | `text` | Название |
+| `email` | `text` | Email для связи |
+| `phone` | `text` | Телефон |
+| `address` | `text` | Адрес |
+| `description` | `text` | Описание компании |
+| `logo_url` | `text` | Ссылка на логотип |
+| `delivery_areas` | `text[]` | Зоны доставки |
+| `working_hours` | `text` | График работы |
+| `total_orders` | `integer` | Всего заказов |
+| `active_orders` | `integer` | Активные заказы |
+| `products_count` | `integer` | Количество товаров |
+| `total_revenue` | `numeric` | Совокупная выручка |
+| `created_at` | `timestamp` | Дата создания |
+| `updated_at` | `timestamp` | Дата обновления |
+
+```sql
+CREATE VIEW public.companies_view AS
+SELECT
+  c.id,
+  c.user_id,
+  c.name,
+  c.email,
+  c.phone,
+  c.address,
+  c.description,
+  c.logo_url,
+  c.delivery_areas,
+  c.working_hours,
+  c.created_at,
+  c.updated_at,
+  COALESCE(stats.total_orders, 0)       AS total_orders,
+  COALESCE(stats.active_orders, 0)      AS active_orders,
+  COALESCE(stats.products_count, 0)     AS products_count,
+  COALESCE(stats.total_revenue, 0::numeric) AS total_revenue
+FROM public.companies c
+LEFT JOIN (
+  SELECT
+    o.company_id,
+    COUNT(*) AS total_orders,
+    COUNT(*) FILTER (WHERE o.status IN ('pending','confirmed')) AS active_orders,
+    COALESCE(SUM(o.total), 0::numeric) AS total_revenue
+  FROM public.orders o
+  GROUP BY o.company_id
+) stats ON stats.company_id = c.id
+LEFT JOIN (
+  SELECT
+    p.company_id,
+    COUNT(*) AS products_count
+  FROM public.products p
+  GROUP BY p.company_id
+) pr ON pr.company_id = c.id;
+```
+
+---
+
 ## 🔐 Безопасность (RLS)
 
 Для всех таблиц включена Row Level Security.  

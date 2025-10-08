@@ -8,7 +8,7 @@ import { ProtectedRoute } from './ProtectedRoute'
 import { PublicRoute } from './PublicRoute'
 
 const DashboardPage = lazy(() => import('@/pages/Dashboard'))
-const UsersPage = lazy(() => import('@/pages/Users'))
+const CompanyPage = lazy(() => import('@/pages/Company'))
 const ContentPage = lazy(() => import('@/pages/Content'))
 const SettingsPage = lazy(() => import('@/pages/Settings'))
 const LoginPage = lazy(() => import('@/pages/Login'))
@@ -33,11 +33,11 @@ const router = createBrowserRouter([
             ),
           },
           {
-            path: 'users',
-            handle: { breadcrumb: 'Пользователи' },
+            path: 'company',
+            handle: { breadcrumb: 'Компания' },
             element: (
               <Suspense fallback={<RouteFallback />}>
-                <UsersPage />
+                <CompanyPage />
               </Suspense>
             ),
           },

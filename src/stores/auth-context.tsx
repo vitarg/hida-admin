@@ -67,7 +67,6 @@ export function AuthProvider({ children, initialUser }: AuthProviderProps) {
 
     const {
       data: { subscription },
-      error: subscriptionError,
     } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!isMounted) {
         return
@@ -76,10 +75,6 @@ export function AuthProvider({ children, initialUser }: AuthProviderProps) {
       setUser(mapSessionToUser(session))
       setIsInitializing(false)
     })
-
-    if (subscriptionError) {
-      console.error('Подписка на изменения авторизации Supabase завершилась с ошибкой', subscriptionError)
-    }
 
     return () => {
       isMounted = false

@@ -26,8 +26,8 @@ export function Sidebar() {
       ),
     },
     {
-      name: 'Пользователи',
-      path: '/users',
+      name: 'Компания',
+      path: '/company',
       icon: (
         <svg
           xmlns="http://www.w3.org/2000/svg"
