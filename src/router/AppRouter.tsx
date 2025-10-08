@@ -4,11 +4,13 @@ import { RouterProvider, createBrowserRouter } from 'react-router-dom'
 import { Layout } from '@/components/layout/Layout'
 
 import { ProtectedRoute } from './ProtectedRoute'
+import { PublicRoute } from './PublicRoute'
 
 const DashboardPage = lazy(() => import('@/pages/Dashboard'))
 const UsersPage = lazy(() => import('@/pages/Users'))
 const ContentPage = lazy(() => import('@/pages/Content'))
 const SettingsPage = lazy(() => import('@/pages/Settings'))
+const LoginPage = lazy(() => import('@/pages/Login'))
 const NotFoundPage = lazy(() => import('@/pages/NotFound'))
 
 const router = createBrowserRouter([
@@ -58,6 +60,19 @@ const router = createBrowserRouter([
         element: (
           <Suspense fallback={<RouteFallback />}>
             <NotFoundPage />
+          </Suspense>
+        ),
+      },
+    ],
+  },
+  {
+    element: <PublicRoute />,
+    children: [
+      {
+        path: '/login',
+        element: (
+          <Suspense fallback={<RouteFallback />}>
+            <LoginPage />
           </Suspense>
         ),
       },

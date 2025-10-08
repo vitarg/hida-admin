@@ -1,12 +1,18 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
 
-/**
- * Temporary guard that always allows access until authentication is implemented.
- * Replace the `isAuthenticated` logic once auth is wired up.
- */
+import { useAuth } from '@/stores/auth-context'
+
 export function ProtectedRoute() {
   const location = useLocation()
-  const isAuthenticated = true
+  const { isAuthenticated, isInitializing } = useAuth()
+
+  if (isInitializing) {
+    return (
+      <div className="flex h-full items-center justify-center py-16 text-muted-foreground">
+        Проверяем права доступа...
+      </div>
+    )
+  }
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace state={{ from: location }} />
