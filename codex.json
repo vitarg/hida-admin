@@ -1,0 +1,31 @@
+{
+  "name": "Hida Admin",
+  "description": "Админ-панель для Hida (агрегатор доставки воды). React + TypeScript + Zustand + TanStack Query + Supabase.",
+  "extends": "./AGENT_RULES.md",
+  "assistant": {
+    "language": "ru",
+    "style": "technical",
+    "tone": "strict",
+    "enforce_rules": true
+  },
+  "rules": {
+    "commit_language": "ru",
+    "commit_format": "short_description + details",
+    "typescript_strict": true,
+    "components_case": "PascalCase",
+    "hooks_case": "camelCase",
+    "files_case": {
+      "components": "PascalCase",
+      "utils": "camelCase"
+    },
+    "lint_on_commit": true,
+    "build_on_commit": true,
+    "architecture": "src/components, src/pages, src/hooks, src/stores, src/services, src/types",
+    "forbidden": [
+      "any",
+      "console.log in production",
+      "English commit messages",
+      "changing tech stack"
+    ]
+  }
+}

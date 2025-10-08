@@ -19,8 +19,8 @@ export default function Login() {
   const fromState = (location.state as LocationState | null)?.from
   const redirectPath = useMemo(() => fromState?.pathname ?? '/', [fromState?.pathname])
 
-  const [email, setEmail] = useState('admin@hida.app')
-  const [password, setPassword] = useState('admin123')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
 
   const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -42,8 +42,7 @@ export default function Login() {
         <CardHeader className="space-y-2 text-center">
           <CardTitle className="text-2xl font-bold">Добро пожаловать в Hida Admin</CardTitle>
           <CardDescription className="text-sm text-muted-foreground">
-            Введите учетные данные администратора. Для демо используйте{' '}
-            <span className="font-medium text-foreground">admin@hida.app / admin123</span>.
+            Авторизуйтесь с помощью учетной записи, созданной в Supabase.
           </CardDescription>
         </CardHeader>
 
@@ -54,7 +53,7 @@ export default function Login() {
               <Input
                 id="email"
                 type="email"
-                placeholder="admin@hida.app"
+                placeholder="you@example.com"
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
                 autoComplete="email"

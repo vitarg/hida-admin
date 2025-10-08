@@ -7,9 +7,14 @@ export function Header() {
   const navigate = useNavigate()
   const { user, logout } = useAuth()
 
-  const handleLogout = () => {
-    logout()
-    navigate('/login', { replace: true })
+  const handleLogout = async () => {
+    try {
+      await logout()
+    } catch (error) {
+      console.error('Не удалось завершить выход из системы', error)
+    } finally {
+      navigate('/login', { replace: true })
+    }
   }
 
   return (
@@ -47,8 +52,8 @@ export function Header() {
           {/* User menu */}
           <div className="flex items-center space-x-3">
             <div className="text-right">
-              <p className="text-sm font-medium">{user?.name ?? 'Администратор'}</p>
-              <p className="text-xs text-muted-foreground">{user?.email ?? 'admin@hida.app'}</p>
+              <p className="text-sm font-medium">{user?.name ?? '—'}</p>
+              <p className="text-xs text-muted-foreground">{user?.email ?? '—'}</p>
             </div>
             <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
               <span className="text-white text-sm font-semibold">

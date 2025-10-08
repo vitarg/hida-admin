@@ -8,8 +8,10 @@ import {
   useState,
   type ReactNode,
 } from 'react'
+import type { Session, User } from '@supabase/supabase-js'
 
-import type { AuthUser, LoginPayload } from '@/types/auth'
+import { supabase } from '@/lib/supabase'
+import type { AuthUser, LoginPayload, UserRole } from '@/types/auth'
 
 interface AuthContextValue {
   user: AuthUser | null
@@ -17,101 +19,105 @@ interface AuthContextValue {
   isInitializing: boolean
   isAuthenticating: boolean
   login: (payload: LoginPayload) => Promise<void>
-  logout: () => void
+  logout: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined)
 
-const AUTH_STORAGE_KEY = 'hida-auth'
-const DEMO_USER: AuthUser = {
-  id: 'admin',
-  name: 'Администратор',
-  email: 'admin@hida.app',
-  role: 'admin',
-}
-
 interface AuthProviderProps {
   children: ReactNode
   /**
-   * Позволяет тестам задавать стартовое состояние, обходя localStorage.
+   * Позволяет тестам задавать стартовое состояние, обходя Supabase.
    */
   initialUser?: AuthUser | null
 }
 
 export function AuthProvider({ children, initialUser }: AuthProviderProps) {
   const isTestInitialised = useRef(initialUser !== undefined)
-  const [user, setUser] = useState<AuthUser | null>(() => {
-    if (initialUser !== undefined) {
-      return initialUser
-    }
-
-    if (typeof window === 'undefined') {
-      return null
-    }
-
-    const stored = window.localStorage.getItem(AUTH_STORAGE_KEY)
-    if (!stored) {
-      return null
-    }
-
-    try {
-      return JSON.parse(stored) as AuthUser
-    } catch {
-      window.localStorage.removeItem(AUTH_STORAGE_KEY)
-      return null
-    }
-  })
+  const [user, setUser] = useState<AuthUser | null>(initialUser ?? null)
   const [isInitializing, setIsInitializing] = useState(!isTestInitialised.current)
   const [isAuthenticating, setIsAuthenticating] = useState(false)
 
   useEffect(() => {
-    if (isTestInitialised.current || typeof window === 'undefined') {
+    if (isTestInitialised.current) {
       return
     }
 
-    setIsInitializing(true)
-    const stored = window.localStorage.getItem(AUTH_STORAGE_KEY)
+    let isMounted = true
 
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored) as AuthUser
-        setUser(parsed)
-      } catch {
-        window.localStorage.removeItem(AUTH_STORAGE_KEY)
-        setUser(null)
+    const initialiseSession = async () => {
+      setIsInitializing(true)
+      const { data, error } = await supabase.auth.getSession()
+
+      if (!isMounted) {
+        return
       }
-    } else {
-      setUser(null)
+
+      if (error) {
+        console.error('Не удалось получить сессию Supabase', error)
+        setUser(null)
+      } else {
+        setUser(mapSessionToUser(data.session))
+      }
+
+      setIsInitializing(false)
     }
 
-    setIsInitializing(false)
+    void initialiseSession()
+
+    const {
+      data: { subscription },
+      error: subscriptionError,
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!isMounted) {
+        return
+      }
+
+      setUser(mapSessionToUser(session))
+      setIsInitializing(false)
+    })
+
+    if (subscriptionError) {
+      console.error('Подписка на изменения авторизации Supabase завершилась с ошибкой', subscriptionError)
+    }
+
+    return () => {
+      isMounted = false
+      subscription.unsubscribe()
+    }
   }, [])
 
   const login = useCallback(async ({ email, password }: LoginPayload) => {
     setIsAuthenticating(true)
-    await new Promise((resolve) => setTimeout(resolve, 600))
 
-    const isValidCredentials =
-      email.trim().toLowerCase() === DEMO_USER.email && password === 'admin123'
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
 
-    if (!isValidCredentials) {
+      if (error) {
+        if (error.message.toLowerCase().includes('invalid login credentials')) {
+          throw new Error('Неверный email или пароль')
+        }
+
+        throw new Error(`Не удалось выполнить вход: ${error.message}`)
+      }
+
+      setUser(mapSessionToUser(data.session))
+    } finally {
       setIsAuthenticating(false)
-      throw new Error('Неверный email или пароль')
     }
-
-    setUser(DEMO_USER)
-    if (typeof window !== 'undefined') {
-      window.localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(DEMO_USER))
-    }
-
-    setIsAuthenticating(false)
   }, [])
 
-  const logout = useCallback(() => {
-    setUser(null)
-    if (typeof window !== 'undefined') {
-      window.localStorage.removeItem(AUTH_STORAGE_KEY)
+  const logout = useCallback(async () => {
+    const { error } = await supabase.auth.signOut()
+
+    if (error) {
+      throw new Error(`Не удалось выйти из системы: ${error.message}`)
     }
+
+    setUser(null)
   }, [])
 
   const value = useMemo<AuthContextValue>(
@@ -137,4 +143,51 @@ export function useAuth() {
   }
 
   return context
+}
+
+function mapSessionToUser(session: Session | null): AuthUser | null {
+  if (!session?.user) {
+    return null
+  }
+
+  return mapSupabaseUser(session.user)
+}
+
+function mapSupabaseUser(user: User): AuthUser | null {
+  if (!user.email) {
+    return null
+  }
+
+  const metadata = (user.user_metadata ?? {}) as Record<string, unknown>
+  const appMetadata = (user.app_metadata ?? {}) as Record<string, unknown>
+
+  const firstLast = [metadata.first_name, metadata.last_name]
+    .map((value) => (typeof value === 'string' ? value.trim() : ''))
+    .filter((value) => value.length > 0)
+    .join(' ')
+
+  const nameCandidates = [metadata.full_name, metadata.name, firstLast, metadata.username]
+
+  const resolvedName =
+    nameCandidates
+      .map((candidate) => (typeof candidate === 'string' ? candidate.trim() : ''))
+      .find((candidate) => candidate.length > 0) ?? user.email
+
+  const roleCandidate =
+    (typeof appMetadata.role === 'string' && appMetadata.role) ||
+    (typeof metadata.role === 'string' && metadata.role) ||
+    'user'
+
+  const resolvedRole = isValidUserRole(roleCandidate) ? roleCandidate : 'user'
+
+  return {
+    id: user.id,
+    email: user.email,
+    name: resolvedName,
+    role: resolvedRole,
+  }
+}
+
+function isValidUserRole(value: string): value is UserRole {
+  return value === 'admin' || value === 'moderator' || value === 'user'
 }
