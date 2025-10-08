@@ -5,6 +5,7 @@ export function Sidebar() {
     {
       name: 'Dashboard',
       path: '/',
+      end: true,
       icon: (
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -110,6 +111,7 @@ export function Sidebar() {
           <NavLink
             key={item.path}
             to={item.path}
+            end={item.end}
             className={({ isActive }) =>
               `flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                 isActive

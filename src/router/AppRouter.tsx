@@ -1,21 +1,92 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { Suspense, lazy } from 'react'
+import { RouterProvider, createBrowserRouter } from 'react-router-dom'
+
 import { Layout } from '@/components/layout/Layout'
-import Dashboard from '@/pages/Dashboard'
-import Users from '@/pages/Users'
-import Content from '@/pages/Content'
-import Settings from '@/pages/Settings'
+
+import { ProtectedRoute } from './ProtectedRoute'
+
+const DashboardPage = lazy(() => import('@/pages/Dashboard'))
+const UsersPage = lazy(() => import('@/pages/Users'))
+const ContentPage = lazy(() => import('@/pages/Content'))
+const SettingsPage = lazy(() => import('@/pages/Settings'))
+const NotFoundPage = lazy(() => import('@/pages/NotFound'))
+
+const router = createBrowserRouter([
+  {
+    path: '/',
+    element: <Layout />,
+    children: [
+      {
+        element: <ProtectedRoute />,
+        children: [
+          {
+            index: true,
+            element: (
+              <Suspense fallback={<RouteFallback />}>
+                <DashboardPage />
+              </Suspense>
+            ),
+          },
+          {
+            path: 'users',
+            element: (
+              <Suspense fallback={<RouteFallback />}>
+                <UsersPage />
+              </Suspense>
+            ),
+          },
+          {
+            path: 'content',
+            element: (
+              <Suspense fallback={<RouteFallback />}>
+                <ContentPage />
+              </Suspense>
+            ),
+          },
+          {
+            path: 'settings',
+            element: (
+              <Suspense fallback={<RouteFallback />}>
+                <SettingsPage />
+              </Suspense>
+            ),
+          },
+        ],
+      },
+      {
+        path: '*',
+        element: (
+          <Suspense fallback={<RouteFallback />}>
+            <NotFoundPage />
+          </Suspense>
+        ),
+      },
+    ],
+  },
+])
 
 export function AppRouter() {
   return (
-    <BrowserRouter>
-      <Layout>
-        <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/users" element={<Users />} />
-          <Route path="/content" element={<Content />} />
-          <Route path="/settings" element={<Settings />} />
-        </Routes>
-      </Layout>
-    </BrowserRouter>
+    <Suspense fallback={<AppFallback />}>
+      <RouterProvider router={router} />
+    </Suspense>
+  )
+}
+
+function AppFallback() {
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-gray-50">
+      <div className="rounded-md border border-gray-200 bg-white px-6 py-4 text-sm text-muted-foreground shadow-sm">
+        Загружаем панель администратора...
+      </div>
+    </div>
+  )
+}
+
+function RouteFallback() {
+  return (
+    <div className="flex h-full flex-1 items-center justify-center py-16 text-muted-foreground">
+      Загрузка...
+    </div>
   )
 }
